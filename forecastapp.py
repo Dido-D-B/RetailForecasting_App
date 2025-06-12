@@ -101,7 +101,7 @@ def set_background(image_path):
     </style>
     """, unsafe_allow_html=True)
 
-set_background("04_Forecast_App/background.png")
+set_background("background.png")
 
 # Transparent container Main Content
 st.markdown("""
@@ -130,13 +130,9 @@ div[data-testid="stAppViewContainer"] > main {
 """, unsafe_allow_html=True)
 
 # LOAD DATA & MODEL
-df_input = pd.read_csv(
-    "/Users/didodeboodt/Documents/Projects/Retail_Forecasting_Project/04_Forecast_App/df_input_light.csv", parse_dates=["date"]
-    )
+df_input = pd.read_csv("df_input_light.csv")
 
-model = joblib.load(
-    "/Users/didodeboodt/Documents/Projects/Retail_Forecasting_Project/03_Models/xgb_best_model.pkl"
-    )
+model = xgb.Booster().load_model("xgb_best_model.pkl")
 
 model_features = [
     'store_nbr', 'item_nbr', 'onpromotion', 'city', 'state', 'store_type', 'store_cluster',
