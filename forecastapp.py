@@ -132,7 +132,8 @@ div[data-testid="stAppViewContainer"] > main {
 # LOAD DATA & MODEL
 df_input = pd.read_csv("df_input_light.csv")
 
-model = xgb.Booster().load_model("xgb_best_model.pkl")
+model = xgb.Booster()
+model.load_model("xgb_best_model.pkl")
 
 model_features = [
     'store_nbr', 'item_nbr', 'onpromotion', 'city', 'state', 'store_type', 'store_cluster',
