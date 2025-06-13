@@ -3,8 +3,6 @@ pandas
 numpy
 xgboost
 joblib
-<<<<<<< HEAD
 gdown
-=======
 gdown==5.2.0
->>>>>>> d70fe0e (Save local changes before pulling)
+
