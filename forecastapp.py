@@ -149,8 +149,7 @@ if not os.path.exists(model_path):
     gdown.download(url, model_path, quiet=False)
 
 # Load the model
-model = xgb.Booster()
-model.load_model(model_path)
+model = joblib.load(model_path)
 
 model_features = [
     'store_nbr', 'item_nbr', 'onpromotion', 'city', 'state', 'store_type', 'store_cluster',
