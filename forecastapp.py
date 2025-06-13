@@ -134,6 +134,7 @@ div[data-testid="stAppViewContainer"] > main {
 
 # LOAD DATA & MODEL
 df_input = pd.read_csv("df_input_light.csv")
+df_input['date'] = pd.to_datetime(df_input['date'])
 stores = df_input['store_nbr'].unique().tolist()
 dates = df_input['date'].unique().tolist()
 
@@ -162,17 +163,28 @@ model_features = [
 ]
 
 # SIDEBAR
-item_sales = df_input.groupby('item_nbr')['unit_sales'].sum().sort_values(ascending=False)
-sorted_items = item_sales.index.tolist()
+# Preload unique values from your input data
+available_combinations = df_input[['store_nbr', 'item_nbr', 'date']].drop_duplicates()
 
-with st.sidebar:
-    st.header("Forecast Input")
-    store_nbr = st.selectbox("Select Store", options=sorted(stores))
-    item_nbr = st.selectbox("Select Item", options=sorted_items)
-    forecast_date = st.date_input(
-        "Select Forecast Date",
-        value=pd.to_datetime(dates[0]).date()
-    )
+# Select store
+store_nbr = st.sidebar.selectbox("Select Store", sorted(available_combinations['store_nbr'].unique()))
+
+# Filter items for the selected store
+filtered_items = available_combinations[available_combinations['store_nbr'] == store_nbr]['item_nbr'].unique()
+item_nbr = st.sidebar.selectbox("Select Item", sorted(filtered_items))
+
+# Filter dates for selected store-item pair
+filtered_dates = available_combinations[
+    (available_combinations['store_nbr'] == store_nbr) &
+    (available_combinations['item_nbr'] == item_nbr)
+]['date'].unique()
+
+forecast_date = st.sidebar.date_input(
+    "Select Forecast Date",
+    value=pd.to_datetime(sorted(filtered_dates)[0]).date(),
+    min_value=pd.to_datetime(min(filtered_dates)).date(),
+    max_value=pd.to_datetime(max(filtered_dates)).date()
+)
 
 # MAIN CONTENT
 st.title("Retail Sales Forecasting App")
@@ -189,7 +201,7 @@ Special thanks to [Kaggle](https://www.kaggle.com/competitions/favorita-grocery-
 
 with st.expander("ℹ️ About this model"):
     st.markdown("""
-    - **Model**: XGBoost Regressor (tree-based)  
+    - **Model**: XGBRegressor (scikit-learn API, tree-based)  
     - **Features**: Time-based lags, rolling averages, and calendar signals  
     - **Target**: Daily unit sales  
     - **Training Range**: 2013–2014  
@@ -200,8 +212,7 @@ with st.expander("ℹ️ About this model"):
 row = df_input[
     (df_input['store_nbr'] == store_nbr) &
     (df_input['item_nbr'] == item_nbr) &
-    (df_input['date'] == pd.to_datetime(forecast_date))
-]
+    (df_input['date'] == pd.to_datetime(forecast_date))]
 
 if row.empty:
     st.error("No data available for this combination. Please choose a different store, item, or date.")
